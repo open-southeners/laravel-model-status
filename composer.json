@@ -1,6 +1,6 @@
 {
-    "name": "open-southeners/packagist_package_here",
-    "description": "and_description_here",
+    "name": "open-southeners/laravel-model-status",
+    "description": "A very simple yet very integrated Laravel status package",
     "license": "MIT",
     "keywords": [
         "open-southeners"
@@ -13,7 +13,9 @@
         }
     ],
     "require": {
-        "php": "^8.0|^8.1|^8.2"
+        "php": ">=8.1",
+        "laravel/framework": "^9",
+        "open-southeners/laravel-helpers": "dev-main"
     },
     "require-dev": {
         "nunomaduro/larastan": "^1.0",
@@ -23,12 +25,12 @@
     },
     "autoload": {
         "psr-4": {
-            "OpenSoutheners\\PhpPackage\\": "src"
+            "OpenSoutheners\\LaravelModelStatus\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "OpenSoutheners\\PhpPackage\\Tests\\": "tests"
+            "OpenSoutheners\\LaravelModelStatus\\Tests\\": "tests"
         }
     },
     "config": {
@@ -37,7 +39,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "OpenSoutheners\\PhpPackage\\ServiceProvider"
+                "OpenSoutheners\\LaravelModelStatus\\ServiceProvider"
             ]
         }
     },

@@ -1,6 +1,6 @@
 <?php
 
-namespace OpenSoutheners\PhpPackage;
+namespace OpenSoutheners\LaravelModelStatus;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 

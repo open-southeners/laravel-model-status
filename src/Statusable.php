@@ -1,0 +1,46 @@
+<?php
+
+namespace OpenSoutheners\LaravelModelStatus;
+
+/**
+ * @property ModelStatus $status
+ * @property array<string> $statuses
+ */
+interface Statusable
+{
+    /**
+     * Get array of statuses cases from enum.
+     * 
+     * @return array<\OpenSoutheners\LaravelModelStatus\ModelStatus>
+     */
+    public function getAllStatuses(): array;
+
+    /**
+     * Check model current status equals introduced.
+     * 
+     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus|mixed $status
+     * @return bool
+     */
+    public function hasStatus($status): bool;
+
+    /**
+     * Set status from enum instance.
+     * 
+     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
+     * @param bool|null $saving
+     * @throws \Exception 
+     * @return $this
+     */
+    public function setStatus(ModelStatus $status, bool $saving): self;
+    
+    /**
+     * Set status when given value matches current status.
+     * 
+     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $current
+     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
+     * @param bool|null $saving
+     * @throws \Exception 
+     * @return $this
+     */
+    public function setStatusWhen($current, $value, bool $saving): self;
+}
