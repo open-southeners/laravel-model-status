@@ -2,6 +2,7 @@
 
 namespace OpenSoutheners\LaravelModelStatus;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses;
 use OpenSoutheners\LaravelModelStatus\Events\StatusSwapped;
@@ -141,8 +142,8 @@ trait HasStatuses
     public function status(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => $value->name,
-            set: fn ($value) => $value->value ?? $value->name
+            get: fn ($status) => $status->name,
+            set: fn ($status) => $status->value ?? $status->name
         );
     }
 
@@ -153,6 +154,20 @@ trait HasStatuses
      */
     public function statuses(): Attribute
     {
-        return Attribute::make(fn () => array_map(fn (ModelStatus $case) => $case->name, $this->getAllStatuses()));
+        return Attribute::make(
+            fn () => array_map(fn (ModelStatus $case) => $case->name, $this->getAllStatuses())
+        );
+    }
+
+    /**
+     * Query models by the specified status.
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
+     * @return void
+     */
+    public function scopeOfStatus(Builder $query, $status)
+    {
+        $query->where('status', $status->value ?? $status->name);
     }
 }

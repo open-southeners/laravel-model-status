@@ -12,7 +12,7 @@ use Exception;
 
 class HasStatusesTest extends TestCase
 {
-    public function testStatusesAttributeFromModelInstanceReturnAllStatusNames()
+    public function testStatusesAttributeReturnAllStatusNames()
     {
         $post = new Post();
 
@@ -20,7 +20,15 @@ class HasStatusesTest extends TestCase
         $this->assertTrue(in_array('Draft', $post->statuses));
     }
 
-    public function testGetAllStatusesFromModelInstanceReturnAllStatusCasesFromEnum()
+    public function testStatusesAttributeOnUnitEnumReturnAllStatusNames()
+    {
+        $comment = new Comment();
+
+        $this->assertTrue(is_array($comment->statuses));
+        $this->assertTrue(in_array('Active', $comment->statuses));
+    }
+
+    public function testGetAllStatusesReturnCasesFromBackedEnum()
     {
         $post = new Post();
 
@@ -28,7 +36,15 @@ class HasStatusesTest extends TestCase
         $this->assertTrue(in_array(PostStatus::Draft, $post->getAllStatuses()));
     }
 
-    public function testHasStatusReturnsTrueWhenValueMatch()
+    public function testGetAllStatusesReturnCasesFromUnitEnum()
+    {
+        $comment = new Comment();
+
+        $this->assertTrue(is_array($comment->getAllStatuses()));
+        $this->assertTrue(in_array(CommentStatus::Active, $comment->getAllStatuses()));
+    }
+
+    public function testHasStatusReturnTrueWhenValueMatch()
     {
         $post = new Post();
 
@@ -38,7 +54,17 @@ class HasStatusesTest extends TestCase
         $this->assertTrue($post->hasStatus(1));
     }
 
-    public function testHasStatusReturnsFalseWhenValueDoesNotMatch()
+    public function testHasStatusReturnTrueWhenValueMatchOnUnitEnum()
+    {
+        $comment = new Comment();
+
+        $comment->status = CommentStatus::Active;
+
+        $this->assertTrue($comment->hasStatus(CommentStatus::Active));
+        $this->assertTrue($comment->hasStatus('Active'));
+    }
+
+    public function testHasStatusReturnFalseWhenValueDoesNotMatch()
     {
         $post = new Post();
 
@@ -89,11 +115,11 @@ class HasStatusesTest extends TestCase
     }
 }
 
-enum CommentStatus: int implements ModelStatus
+enum CommentStatus implements ModelStatus
 {
-    case Active = 1;
+    case Active;
 
-    case Spam = 2;
+    case Spam;
 }
 
 enum PostStatus: int implements ModelStatus
@@ -107,6 +133,12 @@ enum PostStatus: int implements ModelStatus
 
 #[ModelStatuses(PostStatus::class)]
 class Post extends Model implements Statusable
+{
+    use HasStatuses;
+}
+
+#[ModelStatuses(CommentStatus::class)]
+class Comment extends Model implements Statusable
 {
     use HasStatuses;
 }
