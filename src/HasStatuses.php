@@ -65,7 +65,7 @@ trait HasStatuses
     }
     
     /**
-     * Get array of statuses cases from enum.
+     * Get array of statuses cases from enum.   
      * 
      * @return array<\OpenSoutheners\LaravelModelStatus\ModelStatus>
      */
@@ -75,7 +75,7 @@ trait HasStatuses
     }
 
     /**
-     * Check model current status equals introduced.
+     * Check model current status equals introduced one.
      * 
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus|mixed $status
      * @return bool
@@ -83,7 +83,11 @@ trait HasStatuses
     public function hasStatus($status): bool
     {
         if (enum_is_backed(static::$statuses) && ! is_object($status)) {
-            $status = static::$statuses::tryFrom($status);
+            $status = static::$statuses::tryFrom($status) ?? $status;
+        }
+
+        if (is_string($status)) {
+            return $this->status->name === $status;
         }
 
         return $this->status === $status;
@@ -94,10 +98,10 @@ trait HasStatuses
      * 
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
      * @param bool|null $saving
-     * @throws \Exception 
-     * @return $this
+     * @throws \Exception
+     * @return self|bool
      */
-    public function setStatus($status, bool $saving = false): self
+    public function setStatus($status, bool $saving = false)
     {
         if (! $status instanceof static::$statuses) {
             throw new Exception('Model status is not of type '.static::$statuses);
@@ -106,7 +110,7 @@ trait HasStatuses
         $this->status = $status;
 
         if ($saving) {
-            $this->save();
+            return $this->save();
         }
 
         return $this;
@@ -119,16 +123,22 @@ trait HasStatuses
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
      * @param bool|null $saving
      * @throws \Exception 
-     * @return $this
+     * @return self|bool
      */
-    public function setStatusWhen($current, $value, bool $saving = true): self
+    public function setStatusWhen($current, $value, bool $saving = true)
     {
         if ($this->hasStatus($current)) {
-            $this->setStatus($value, $saving);
+            $result = $this->setStatus($value, $saving);
 
-            if (static::$statusesEvents) {
+            $result = $saving ? $result : true;
+
+            if (static::$statusesEvents && $result) {
                 event(new StatusSwapped($this, $current, $value));
             }
+        }
+
+        if ($saving) {
+            return $result;
         }
 
         return $this;
@@ -166,7 +176,7 @@ trait HasStatuses
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
      * @return void
      */
-    public function scopeOfStatus(Builder $query, $status)
+    public function scopeOfStatus(Builder $query, ModelStatus $status)
     {
         $query->where('status', $status->value ?? $status->name);
     }

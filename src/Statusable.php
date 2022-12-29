@@ -29,9 +29,9 @@ interface Statusable
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
      * @param bool|null $saving
      * @throws \Exception 
-     * @return $this
+     * @return self|bool
      */
-    public function setStatus(ModelStatus $status, bool $saving): self;
+    public function setStatus(ModelStatus $status, bool $saving);
     
     /**
      * Set status when given value matches current status.
@@ -40,7 +40,7 @@ interface Statusable
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
      * @param bool|null $saving
      * @throws \Exception 
-     * @return $this
+     * @return self|bool
      */
-    public function setStatusWhen($current, $value, bool $saving): self;
+    public function setStatusWhen($current, $value, bool $saving);
 }
