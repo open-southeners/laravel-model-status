@@ -13,8 +13,7 @@
         }
     ],
     "require": {
-        "php": ">=8.1",
-        "laravel/framework": "^9",
+        "php": "^8.1|^8.2",
         "open-southeners/laravel-helpers": "dev-main"
     },
     "require-dev": {
