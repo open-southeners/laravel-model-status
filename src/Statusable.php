@@ -27,7 +27,7 @@ interface Statusable
      * Set status from enum instance.
      * 
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
-     * @param bool|null $saving
+     * @param bool $saving
      * @throws \Exception 
      * @return self|bool
      */
@@ -38,7 +38,7 @@ interface Statusable
      * 
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $current
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
-     * @param bool|null $saving
+     * @param bool $saving
      * @throws \Exception 
      * @return self|bool
      */
