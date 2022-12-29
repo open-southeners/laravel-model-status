@@ -2,11 +2,11 @@
 
 namespace OpenSoutheners\LaravelModelStatus\Tests;
 
-use Illuminate\Database\Eloquent\Model;
-use OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses;
-use OpenSoutheners\LaravelModelStatus\HasStatuses;
-use OpenSoutheners\LaravelModelStatus\ModelStatus;
-use OpenSoutheners\LaravelModelStatus\Statusable;
+use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Comment;
+use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\CommentStatus;
+use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Post;
+use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\PostStatus;
+use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Tag;
 use PHPUnit\Framework\TestCase;
 use Exception;
 
@@ -89,10 +89,22 @@ class HasStatusesTest extends TestCase
 
         $post->status = PostStatus::Draft;
 
-        $post->setStatusWhen(PostStatus::Draft, PostStatus::Published, false);
+        Post::withoutStatusEvents(fn () => $post->setStatusWhen(PostStatus::Draft, PostStatus::Published));
 
         $this->assertFalse($post->status === PostStatus::Draft);
         $this->assertTrue($post->status === PostStatus::Published);
+    }
+
+    public function testSetStatusWhenThrowExceptionWhenSameValuesAreIntroduced()
+    {
+        $post = new Post();
+
+        $post->status = PostStatus::Draft;
+
+        $this->expectException(\ErrorException::class);
+        $this->expectExceptionMessage('Trying to set status when current is the same');
+
+        Post::withoutStatusEvents(fn () => $post->setStatusWhen(PostStatus::Draft, PostStatus::Draft));
     }
 
     public function testHasStatusReturnFalseWhenDifferentEnumGiven()
@@ -113,32 +125,12 @@ class HasStatusesTest extends TestCase
 
         $post->setStatus(CommentStatus::Active);
     }
-}
 
-enum CommentStatus implements ModelStatus
-{
-    case Active;
+    public function testModelWithoutStatusesAttributeThrowException()
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Model statuses must be setup, but there is none');
 
-    case Spam;
-}
-
-enum PostStatus: int implements ModelStatus
-{
-    case Draft = 1;
-    
-    case Published = 2;
-
-    case Hidden = 3;
-}
-
-#[ModelStatuses(PostStatus::class)]
-class Post extends Model implements Statusable
-{
-    use HasStatuses;
-}
-
-#[ModelStatuses(CommentStatus::class)]
-class Comment extends Model implements Statusable
-{
-    use HasStatuses;
+        new Tag;
+    }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses;
 use OpenSoutheners\LaravelModelStatus\Events\StatusSwapped;
+use OpenSoutheners\LaravelModelStatus\Exceptions\SameStatusValuesException;
 use function OpenSoutheners\LaravelHelpers\Enums\enum_is_backed;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -40,7 +41,7 @@ trait HasStatuses
             $reflector->getAttributes(),
             fn (ReflectionAttribute $attribute) => $attribute->getName() === ModelStatuses::class
         );
-        
+
         $attribute = reset($attributesArr);
 
         if (! $attribute) {
@@ -49,9 +50,12 @@ trait HasStatuses
 
         /** @var \OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses $attributeInstance */
         $attributeInstance = $attribute->newInstance();
-        
+
         static::$statuses = $attributeInstance->enum;
-        static::$statusesEvents = $attributeInstance->events;
+
+        if (! isset(static::$statusesEvents)) {
+            static::$statusesEvents = $attributeInstance->events;
+        }
     }
 
     /**
@@ -63,9 +67,26 @@ trait HasStatuses
     {
         $this->mergeFillable(['status']);
     }
-    
+
     /**
-     * Get array of statuses cases from enum.   
+     * Run the action without triggering any event related to statuses.
+     * 
+     * @param \Closure $callback
+     * @return mixed
+     */
+    public static function withoutStatusEvents(\Closure $callback)
+    {
+        static::$statusesEvents = false;
+
+        $result = $callback();
+
+        static::$statusesEvents = true;
+
+        return $result;
+    }
+
+    /**
+     * Get array of statuses cases from enum.
      * 
      * @return array<\OpenSoutheners\LaravelModelStatus\ModelStatus>
      */
@@ -125,8 +146,12 @@ trait HasStatuses
      * @throws \Exception 
      * @return self|bool
      */
-    public function setStatusWhen($current, $value, bool $saving = true)
+    public function setStatusWhen($current, $value, bool $saving = false)
     {
+        if ($current === $value) {
+            throw new \ErrorException('Trying to set status when current is the same', 0, E_NOTICE);
+        }
+
         if ($this->hasStatus($current)) {
             $result = $this->setStatus($value, $saving);
 

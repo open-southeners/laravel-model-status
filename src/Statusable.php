@@ -3,8 +3,8 @@
 namespace OpenSoutheners\LaravelModelStatus;
 
 /**
- * @property ModelStatus $status
- * @property array<string> $statuses
+ * @property \OpenSoutheners\LaravelModelStatus\ModelStatus $status
+ * @property-read array<string> $statuses
  */
 interface Statusable
 {

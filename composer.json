@@ -36,12 +36,5 @@
     "config": {
         "sort-packages": true
     },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "OpenSoutheners\\LaravelModelStatus\\ServiceProvider"
-            ]
-        }
-    },
     "minimum-stability": "dev"
 }
