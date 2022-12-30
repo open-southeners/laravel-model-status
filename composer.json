@@ -3,7 +3,13 @@
     "description": "A very simple yet very integrated Laravel status package",
     "license": "MIT",
     "keywords": [
-        "open-southeners"
+        "open-southeners",
+        "laravel",
+        "laravel-package",
+        "model-statuses",
+        "php8",
+        "php-attributes",
+        "php-enums"
     ],
     "authors": [
         {
