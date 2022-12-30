@@ -14,7 +14,7 @@
     ],
     "require": {
         "php": "^8.1|^8.2",
-        "open-southeners/laravel-helpers": "dev-main"
+        "open-southeners/laravel-helpers": "^0.9"
     },
     "require-dev": {
         "nunomaduro/larastan": "^1.0",
