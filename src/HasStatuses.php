@@ -190,11 +190,22 @@ trait HasStatuses
         return $this;
     }
 
+    /**
+     * Get status enum as attribute.
+     * 
+     * @return \OpenSoutheners\LaravelModelStatus\ModelStatus|null
+     */
     public function getStatusAttribute()
     {
         return static::$statuses::tryFrom($this->attributes['status'] ?? null);
     }
 
+    /**
+     * Set enum as status attribute.
+     * 
+     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
+     * @return void
+     */
     public function setStatusAttribute($value)
     {
         $this->attributes['status'] = $value->value ?? $value->name;
