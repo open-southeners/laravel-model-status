@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2023-01-04
+
+### Added
+
+- Status attribute cast for `toArray` / `toJson` Laravel model methods
+
+### Removed
+
+- `open-southeners/laravel-helpers` dependency (not gonna use UnitEnums)
+
+### Fixed
+
+- Inconsistency when getting status enum as attribute
+
 ## [1.0.1] - 2022-12-30
 
 ### Fixed
