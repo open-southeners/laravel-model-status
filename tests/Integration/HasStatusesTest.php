@@ -151,4 +151,15 @@ class HasStatusesTest extends TestCase
         $this->assertTrue($comments->first()->id == $firstComment->id);
         $this->assertTrue($comments->last()->id == $secondComment->id);
     }
+
+    public function testPostModelSaveSetsDefaultStatus()
+    {
+        $post = new Post(['title' => 'hello world', 'content' => 'hello']);
+
+        $this->assertTrue($post->defaultStatus() === PostStatus::Draft);
+
+        $post->save();
+
+        $this->assertTrue($post->hasStatus(PostStatus::Draft));
+    }
 }

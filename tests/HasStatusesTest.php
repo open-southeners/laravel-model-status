@@ -2,7 +2,6 @@
 
 namespace OpenSoutheners\LaravelModelStatus\Tests;
 
-use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Comment;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\CommentStatus;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\PostStatus;
@@ -20,28 +19,12 @@ class HasStatusesTest extends TestCase
         $this->assertTrue(in_array('Draft', $post->statuses));
     }
 
-    public function testStatusesAttributeOnUnitEnumReturnAllStatusNames()
-    {
-        $comment = new Comment();
-
-        $this->assertTrue(is_array($comment->statuses));
-        $this->assertTrue(in_array('Active', $comment->statuses));
-    }
-
     public function testGetAllStatusesReturnCasesFromBackedEnum()
     {
         $post = new Post();
 
         $this->assertTrue(is_array($post->getAllStatuses()));
         $this->assertTrue(in_array(PostStatus::Draft, $post->getAllStatuses()));
-    }
-
-    public function testGetAllStatusesReturnCasesFromUnitEnum()
-    {
-        $comment = new Comment();
-
-        $this->assertTrue(is_array($comment->getAllStatuses()));
-        $this->assertTrue(in_array(CommentStatus::Active, $comment->getAllStatuses()));
     }
 
     public function testHasStatusReturnTrueWhenValueMatch()
@@ -52,16 +35,6 @@ class HasStatusesTest extends TestCase
 
         $this->assertTrue($post->hasStatus(PostStatus::Draft));
         $this->assertTrue($post->hasStatus(1));
-    }
-
-    public function testHasStatusReturnTrueWhenValueMatchOnUnitEnum()
-    {
-        $comment = new Comment();
-
-        $comment->status = CommentStatus::Active;
-
-        $this->assertTrue($comment->hasStatus(CommentStatus::Active));
-        $this->assertTrue($comment->hasStatus('Active'));
     }
 
     public function testHasStatusReturnFalseWhenValueDoesNotMatch()
@@ -81,6 +54,27 @@ class HasStatusesTest extends TestCase
         $post->setStatus(PostStatus::Draft);
 
         $this->assertTrue($post->status === PostStatus::Draft);
+    }
+
+    public function testStatusAttributeCastingToArray()
+    {
+        $post = new Post();
+
+        $post->setStatus(PostStatus::Draft);
+
+        $this->assertArrayHasKey('status', $post->toArray());
+        $this->assertIsString($post->toArray()['status']);
+        $this->assertTrue($post->toArray()['status'] === PostStatus::Draft->name);
+    }
+
+    public function testStatusAttributeCastingToJson()
+    {
+        $post = new Post();
+
+        $post->setStatus(PostStatus::Draft);
+
+        $this->assertIsString(json_decode($post->toJson())->status);
+        $this->assertTrue(json_decode($post->toJson())->status === PostStatus::Draft->name);
     }
 
     public function testSetStatusWhenOnModelThatMatchExactStatus()

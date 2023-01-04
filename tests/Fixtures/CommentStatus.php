@@ -4,9 +4,9 @@ namespace OpenSoutheners\LaravelModelStatus\Tests\Fixtures;
 
 use OpenSoutheners\LaravelModelStatus\ModelStatus;
 
-enum CommentStatus implements ModelStatus
+enum CommentStatus: int implements ModelStatus
 {
-    case Active;
+    case Active = 1;
 
-    case Spam;
+    case Spam = 2;
 }

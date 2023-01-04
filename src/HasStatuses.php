@@ -5,9 +5,8 @@ namespace OpenSoutheners\LaravelModelStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses;
+use OpenSoutheners\LaravelModelStatus\Casts\Status;
 use OpenSoutheners\LaravelModelStatus\Events\StatusSwapped;
-use OpenSoutheners\LaravelModelStatus\Exceptions\SameStatusValuesException;
-use function OpenSoutheners\LaravelHelpers\Enums\enum_is_backed;
 use ReflectionAttribute;
 use ReflectionClass;
 use Exception;
@@ -26,6 +25,11 @@ trait HasStatuses
      * @var bool
      */
     protected static $statusesEvents;
+    
+    /**
+     * @var \OpenSoutheners\LaravelModelStatus\ModelStatus
+     */
+    protected static $defaultStatus;
 
     /**
      * Boot class trait within model lifecycle.
@@ -52,9 +56,14 @@ trait HasStatuses
         $attributeInstance = $attribute->newInstance();
 
         static::$statuses = $attributeInstance->enum;
+        static::$defaultStatus = $attributeInstance->default;
 
         if (! isset(static::$statusesEvents)) {
             static::$statusesEvents = $attributeInstance->events;
+        }
+
+        if (static::$defaultStatus && static::$statusesEvents) {
+            static::creating(fn (self $model) => $model->status = static::$defaultStatus);
         }
     }
 
@@ -66,6 +75,8 @@ trait HasStatuses
     public function initializeHasStatuses()
     {
         $this->mergeFillable(['status']);
+
+        $this->mergeCasts(['status' => Status::class]);
     }
 
     /**
@@ -96,6 +107,16 @@ trait HasStatuses
     }
 
     /**
+     * Get model default status.
+     * 
+     * @return \OpenSoutheners\LaravelModelStatus\ModelStatus|null
+     */
+    public function defaultStatus()
+    {
+        return static::$defaultStatus;
+    }
+
+    /**
      * Check model current status equals introduced one.
      * 
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus|mixed $status
@@ -103,7 +124,7 @@ trait HasStatuses
      */
     public function hasStatus($status): bool
     {
-        if (enum_is_backed(static::$statuses) && ! is_object($status)) {
+        if (! is_object($status)) {
             $status = static::$statuses::tryFrom($status) ?? $status;
         }
 
@@ -160,28 +181,25 @@ trait HasStatuses
             if (static::$statusesEvents && $result) {
                 event(new StatusSwapped($this, $current, $value));
             }
-        }
 
-        if ($saving) {
-            return $result;
+            if ($saving) {
+                return $result;
+            }
         }
 
         return $this;
     }
 
-    /**
-     * Model list of available statuses
-     * 
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    public function status(): Attribute
+    public function getStatusAttribute()
     {
-        return Attribute::make(
-            get: fn ($status) => $status->name,
-            set: fn ($status) => $status->value ?? $status->name
-        );
+        return static::$statuses::tryFrom($this->attributes['status'] ?? null);
     }
 
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = $value->value ?? $value->name;
+    }
+    
     /**
      * Model list of available statuses
      * 

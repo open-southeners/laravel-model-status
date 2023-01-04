@@ -12,8 +12,9 @@ class ModelStatuses
      * 
      * @param class-string<\OpenSoutheners\LaravelModelStatus\ModelStatus> $enum
      * @param bool $events
+     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus|null $default
      */
-    public function __construct(public string $enum, public bool $events = false)
+    public function __construct(public string $enum, public bool $events = false, public $default = null)
     {
         // 
     }
