@@ -152,6 +152,27 @@ class HasStatusesTest extends TestCase
         $this->assertTrue($comments->last()->id == $secondComment->id);
     }
 
+    public function testOfStatusesScopeReturnModelsWithSpecifiedStatuses()
+    {
+        $firstComment = new Comment(['content' => 'lorem ipsum']);
+        $firstComment->setStatus(CommentStatus::Active, true);
+
+        $secondComment = new Comment(['content' => 'lorem ipsum']);
+        $secondComment->setStatus(CommentStatus::Active, true);
+
+        $thirdComment = new Comment(['content' => 'hello world']);
+        $thirdComment->setStatus(CommentStatus::Spam, true);
+
+        $comments = Comment::query()->ofStatuses([
+            CommentStatus::Active,
+            CommentStatus::Spam,
+        ])->get();
+
+        $this->assertTrue($comments->count() === 3);
+        $this->assertTrue($comments->first()->id == $firstComment->id);
+        $this->assertTrue($comments->last()->id == $thirdComment->id);
+    }
+
     public function testPostModelSaveSetsDefaultStatus()
     {
         $post = new Post(['title' => 'hello world', 'content' => 'hello']);

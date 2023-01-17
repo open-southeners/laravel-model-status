@@ -234,4 +234,16 @@ trait HasStatuses
     {
         $query->where('status', $status->value ?? $status->name);
     }
+
+    /**
+     * Query models by the specified statuses.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array<\OpenSoutheners\LaravelModelStatus\ModelStatus> $statuses
+     * @return void
+     */
+    public function scopeOfStatuses(Builder $query, array $statuses)
+    {
+        $query->whereIn('status', array_map(fn (ModelStatus $statusCase) => $statusCase->value ?? $statusCase->name, $statuses));
+    }
 }
