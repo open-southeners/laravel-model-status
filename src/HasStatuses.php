@@ -197,7 +197,11 @@ trait HasStatuses
      */
     public function getStatusAttribute()
     {
-        return static::$statuses::tryFrom($this->attributes['status'] ?? null);
+        if (! ($this->attributes['status'] ?? null)) {
+            return null;
+        }
+
+        return static::$statuses::tryFrom($this->attributes['status']);
     }
 
     /**
