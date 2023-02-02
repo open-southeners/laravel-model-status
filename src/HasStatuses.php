@@ -5,7 +5,7 @@ namespace OpenSoutheners\LaravelModelStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses;
-use OpenSoutheners\LaravelModelStatus\Casts\Status;
+use OpenSoutheners\LaravelModelStatus\Casts\StatusEnumCaseName;
 use OpenSoutheners\LaravelModelStatus\Events\StatusSwapped;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -76,7 +76,7 @@ trait HasStatuses
     {
         $this->mergeFillable(['status']);
 
-        $this->mergeCasts(['status' => Status::class]);
+        $this->mergeCasts(['status' => StatusEnumCaseName::class]);
     }
 
     /**

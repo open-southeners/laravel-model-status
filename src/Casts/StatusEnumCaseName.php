@@ -4,7 +4,7 @@ namespace OpenSoutheners\LaravelModelStatus\Casts;
 
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
-class Status implements CastsAttributes
+class StatusEnumCaseName implements CastsAttributes
 {
     /**
      * Cast the given value.
@@ -17,7 +17,7 @@ class Status implements CastsAttributes
      */
     public function get($model, string $key, $value, array $attributes): string
     {
-        return $model->status->name;
+        return ($model->status ?? $model::$defaultStatus)?->name;
     }
  
     /**
