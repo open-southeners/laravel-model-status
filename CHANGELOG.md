@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2023-02-02
+
+### Added
+
+- Status swapping & swapped events (observable) to Eloquent models that uses the `HasStatuses` trait: `swappingStatusName`, `swappedStatusName`. **Do not confuse with saving, saved Eloquent events, these are triggered from setStatus & setStatusWhen functions, so may you always use these**
+
+### Changed
+
+- `setStatus` and `setStatusWhen` functions doesn't return self, instead they return always `true` when not saving, true or false otherwise
+
+### Fixed
+
+- `StatusEnumCaseName` attribute cast now returns `defaultStatus` if defined on the trait, null otherwise
+
 ## [1.2.1] - 2023-01-26
 
 ### Fixed
