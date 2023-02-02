@@ -2,17 +2,20 @@
 
 namespace OpenSoutheners\LaravelModelStatus;
 
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses;
 use OpenSoutheners\LaravelModelStatus\Casts\StatusEnumCaseName;
 use OpenSoutheners\LaravelModelStatus\Events\StatusSwapped;
+use OpenSoutheners\LaravelModelStatus\Events\StatusSwapping;
 use ReflectionAttribute;
 use ReflectionClass;
 use Exception;
 
 /**
  * @mixin \Illuminate\Database\Eloquent\Model
+ * @property-read string[] $statuses
  */
 trait HasStatuses
 {
@@ -77,6 +80,17 @@ trait HasStatuses
         $this->mergeFillable(['status']);
 
         $this->mergeCasts(['status' => StatusEnumCaseName::class]);
+
+        if (static::$statusesEvents) {
+            $observableEvents = [];
+
+            foreach ($this->statuses as $status) {
+                $observableEvents[] = "swapping{$status}";
+                $observableEvents[] = "swapped{$status}";
+            }
+
+            $this->addObservableEvents($observableEvents);
+        }
     }
 
     /**
@@ -85,15 +99,21 @@ trait HasStatuses
      * @param \Closure $callback
      * @return mixed
      */
-    public static function withoutStatusEvents(\Closure $callback)
+    public static function withoutStatusEvents(Closure $callback)
     {
         static::$statusesEvents = false;
 
-        $result = $callback();
+        return tap($callback(), fn () => static::$statusesEvents = true);
+    }
 
-        static::$statusesEvents = true;
+    public static function swappedStatus(Closure $callback, ModelStatus|null $status = null)
+    {
+        static::registerModelEvent("swapped{$status?->name}", $callback);
+    }
 
-        return $result;
+    public static function swappingStatus(Closure $callback, ModelStatus|null $status = null)
+    {
+        static::registerModelEvent("swapping{$status?->name}", $callback);
     }
 
     /**
@@ -141,7 +161,7 @@ trait HasStatuses
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
      * @param bool|null $saving
      * @throws \Exception
-     * @return self|bool
+     * @return bool
      */
     public function setStatus($status, bool $saving = false)
     {
@@ -151,11 +171,45 @@ trait HasStatuses
 
         $this->status = $status;
 
+        $saving &= $this->fireSwappingStatusModelEvents($previousStatus = $this->getOriginal('status'));
+        
         if ($saving) {
-            return $this->save();
+            return tap($this->save(), fn ($saveResult) => $saveResult && $this->fireSwappedStatusModelEvents($previousStatus));
         }
 
-        return $this;
+        return true;
+    }
+
+    /**
+     * Fire swapping status custom Eloquent event.
+     */
+    protected function fireSwappingStatusModelEvents(ModelStatus|null $previousStatus = null): bool
+    {
+        if (! static::$statusesEvents) {
+            return true;
+        }
+
+        if ($previousStatus === $this->status) {
+            return false;
+        }
+
+        $untilResult = $this->fireModelEvent("swapping{$this->status->name}");
+
+        event(new StatusSwapping($this, $this->status, $previousStatus));
+
+        return $untilResult !== false;
+    }
+
+    /**
+     * Fire status swapped custom Eloquent event.
+     */
+    protected function fireSwappedStatusModelEvents(ModelStatus|null $previousStatus = null): void
+    {
+        if (static::$statusesEvents && $previousStatus !== $this->status) {
+            $this->fireModelEvent("swapped{$this->status->name}", false);
+            
+            event(new StatusSwapped($this, $this->status, $previousStatus));
+        }
     }
 
     /**
@@ -165,7 +219,7 @@ trait HasStatuses
      * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
      * @param bool|null $saving
      * @throws \Exception 
-     * @return self|bool
+     * @return bool
      */
     public function setStatusWhen($current, $value, bool $saving = false)
     {
@@ -173,21 +227,11 @@ trait HasStatuses
             throw new \ErrorException('Trying to set status when current is the same', 0, E_NOTICE);
         }
 
-        if ($this->hasStatus($current)) {
-            $result = $this->setStatus($value, $saving);
-
-            $result = $saving ? $result : true;
-
-            if (static::$statusesEvents && $result) {
-                event(new StatusSwapped($this, $current, $value));
-            }
-
-            if ($saving) {
-                return $result;
-            }
+        if (! $this->hasStatus($current)) {
+            return false;
         }
 
-        return $this;
+        return $this->setStatus($value, $saving);
     }
 
     /**

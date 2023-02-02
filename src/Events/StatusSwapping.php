@@ -7,7 +7,7 @@ use Illuminate\Queue\SerializesModels;
 use OpenSoutheners\LaravelModelStatus\ModelStatus;
 use OpenSoutheners\LaravelModelStatus\Statusable;
 
-class StatusSwapped
+class StatusSwapping
 {
     use Dispatchable;
     use SerializesModels;

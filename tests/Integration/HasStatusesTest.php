@@ -5,6 +5,7 @@ namespace OpenSoutheners\LaravelModelStatus\Tests\Integration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use OpenSoutheners\LaravelModelStatus\Events\StatusSwapped;
+use OpenSoutheners\LaravelModelStatus\Events\StatusSwapping;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Comment;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\CommentStatus;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Post;
@@ -107,14 +108,35 @@ class HasStatusesTest extends TestCase
         
         $post->setStatus(PostStatus::Draft, true);
 
-        Event::fake(StatusSwapped::class);
+        Event::fake([StatusSwapping::class, StatusSwapped::class]);
 
         Post::withoutStatusEvents(fn () => $post->setStatusWhen(PostStatus::Draft, PostStatus::Published, true));
 
+        Event::assertNotDispatched(StatusSwapping::class);
         Event::assertNotDispatched(StatusSwapped::class);
     }
 
-    public function testSetStatusWhenTriggersStatusSwappedEvent()
+    public function testSetStatusWithoutSavingWhenTriggersStatusSwappingEvent()
+    {
+        $post = new Post();
+
+        $post->title = 'Hello world';
+        $post->content = 'The typical lorem ipsum...';
+        
+        $post->setStatus(PostStatus::Draft, true);
+
+        Event::fake(StatusSwapping::class);
+        
+        $post->setStatusWhen(PostStatus::Draft, PostStatus::Published, true);
+
+        Event::assertDispatched(StatusSwapping::class, fn (StatusSwapping $event) =>
+            get_class($event->model) === Post::class
+                && $event->actual === PostStatus::Published
+                && $event->previous === PostStatus::Draft
+        );
+    }
+
+    public function testSetStatusWithSavingWhenTriggersStatusSwappedEvent()
     {
         $post = new Post();
 
@@ -129,8 +151,8 @@ class HasStatusesTest extends TestCase
 
         Event::assertDispatched(StatusSwapped::class, fn (StatusSwapped $event) =>
             get_class($event->model) === Post::class
-                && $event->previous === PostStatus::Draft
                 && $event->actual === PostStatus::Published
+                && $event->previous === PostStatus::Draft
         );
     }
 

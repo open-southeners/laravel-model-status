@@ -2,6 +2,10 @@
 
 namespace OpenSoutheners\LaravelModelStatus\Tests;
 
+use Illuminate\Container\Container;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Testing\Fakes\EventFake;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\CommentStatus;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\PostStatus;
@@ -11,6 +15,11 @@ use Exception;
 
 class HasStatusesTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        Container::getInstance()->bind('events', fn () => new EventFake(new Dispatcher()));
+    }
+
     public function testStatusesAttributeReturnAllStatusNames()
     {
         $post = new Post();
