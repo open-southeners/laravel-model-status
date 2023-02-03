@@ -17,7 +17,7 @@ class StatusEnumCaseName implements CastsAttributes
      */
     public function get($model, string $key, $value, array $attributes): string
     {
-        return ($model->status ?? $model::$defaultStatus)?->name;
+        return ($model->status ?? $model->defaultStatus())?->name;
     }
  
     /**
