@@ -43,4 +43,11 @@ interface Statusable
      * @return self|bool
      */
     public function setStatusWhen($current, $value, bool $saving);
+
+    /**
+     * Get model default status.
+     * 
+     * @return \OpenSoutheners\LaravelModelStatus\ModelStatus|null
+     */
+    public function defaultStatus();
 }
