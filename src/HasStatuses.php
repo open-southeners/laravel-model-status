@@ -3,6 +3,7 @@
 namespace OpenSoutheners\LaravelModelStatus;
 
 use Closure;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use OpenSoutheners\LaravelModelStatus\Attributes\ModelStatuses;
@@ -11,10 +12,10 @@ use OpenSoutheners\LaravelModelStatus\Events\StatusSwapped;
 use OpenSoutheners\LaravelModelStatus\Events\StatusSwapping;
 use ReflectionAttribute;
 use ReflectionClass;
-use Exception;
 
 /**
  * @mixin \Illuminate\Database\Eloquent\Model
+ *
  * @property-read string[] $statuses
  */
 trait HasStatuses
@@ -28,7 +29,7 @@ trait HasStatuses
      * @var bool
      */
     protected static $statusesEvents;
-    
+
     /**
      * @var \OpenSoutheners\LaravelModelStatus\ModelStatus
      */
@@ -36,9 +37,10 @@ trait HasStatuses
 
     /**
      * Boot class trait within model lifecycle.
-     * 
-     * @throws \Exception 
+     *
      * @return void
+     *
+     * @throws \Exception
      */
     public static function bootHasStatuses()
     {
@@ -66,13 +68,15 @@ trait HasStatuses
         }
 
         if (static::$defaultStatus && static::$statusesEvents) {
-            static::creating(fn (self $model) => $model->status = static::$defaultStatus);
+            static::creating(function (self $model) {
+                $model->status = static::$defaultStatus;
+            });
         }
     }
 
     /**
      * Initialize trait within model instanciation.
-     * 
+     *
      * @return void
      */
     public function initializeHasStatuses()
@@ -95,8 +99,7 @@ trait HasStatuses
 
     /**
      * Run the action without triggering any event related to statuses.
-     * 
-     * @param \Closure $callback
+     *
      * @return mixed
      */
     public static function withoutStatusEvents(Closure $callback)
@@ -118,7 +121,7 @@ trait HasStatuses
 
     /**
      * Get array of statuses cases from enum.
-     * 
+     *
      * @return array<\OpenSoutheners\LaravelModelStatus\ModelStatus>
      */
     public function getAllStatuses(): array
@@ -128,7 +131,7 @@ trait HasStatuses
 
     /**
      * Get model default status.
-     * 
+     *
      * @return \OpenSoutheners\LaravelModelStatus\ModelStatus|null
      */
     public function defaultStatus()
@@ -138,9 +141,8 @@ trait HasStatuses
 
     /**
      * Check model current status equals introduced one.
-     * 
-     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus|mixed $status
-     * @return bool
+     *
+     * @param  \OpenSoutheners\LaravelModelStatus\ModelStatus|mixed  $status
      */
     public function hasStatus($status): bool
     {
@@ -157,11 +159,12 @@ trait HasStatuses
 
     /**
      * Set status from enum instance.
-     * 
-     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
-     * @param bool|null $saving
-     * @throws \Exception
+     *
+     * @param  \OpenSoutheners\LaravelModelStatus\ModelStatus  $status
+     * @param  bool|null  $saving
      * @return bool
+     *
+     * @throws \Exception
      */
     public function setStatus($status, bool $saving = false)
     {
@@ -172,7 +175,7 @@ trait HasStatuses
         $this->status = $status;
 
         $saving &= $this->fireSwappingStatusModelEvents($previousStatus = $this->getOriginal('status'));
-        
+
         if ($saving) {
             return tap($this->save(), fn ($saveResult) => $saveResult && $this->fireSwappedStatusModelEvents($previousStatus));
         }
@@ -207,19 +210,20 @@ trait HasStatuses
     {
         if (static::$statusesEvents && $previousStatus !== $this->status) {
             $this->fireModelEvent("swapped{$this->status->name}", false);
-            
+
             event(new StatusSwapped($this, $this->status, $previousStatus));
         }
     }
 
     /**
      * Set status when given value matches current status.
-     * 
-     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $current
-     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
-     * @param bool|null $saving
-     * @throws \Exception 
+     *
+     * @param  \OpenSoutheners\LaravelModelStatus\ModelStatus  $current
+     * @param  \OpenSoutheners\LaravelModelStatus\ModelStatus  $value
+     * @param  bool|null  $saving
      * @return bool
+     *
+     * @throws \Exception
      */
     public function setStatusWhen($current, $value, bool $saving = false)
     {
@@ -236,7 +240,7 @@ trait HasStatuses
 
     /**
      * Get status enum as attribute.
-     * 
+     *
      * @return \OpenSoutheners\LaravelModelStatus\ModelStatus|null
      */
     public function getStatusAttribute()
@@ -250,19 +254,17 @@ trait HasStatuses
 
     /**
      * Set enum as status attribute.
-     * 
-     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $value
+     *
+     * @param  \OpenSoutheners\LaravelModelStatus\ModelStatus  $value
      * @return void
      */
     public function setStatusAttribute($value)
     {
         $this->attributes['status'] = $value->value ?? $value->name;
     }
-    
+
     /**
      * Model list of available statuses
-     * 
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
     public function statuses(): Attribute
     {
@@ -273,9 +275,8 @@ trait HasStatuses
 
     /**
      * Query models by the specified status.
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param \OpenSoutheners\LaravelModelStatus\ModelStatus $status
+     *
+     * @param  \OpenSoutheners\LaravelModelStatus\ModelStatus  $status
      * @return void
      */
     public function scopeOfStatus(Builder $query, ModelStatus $status)
@@ -286,8 +287,7 @@ trait HasStatuses
     /**
      * Query models by the specified statuses.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param array<\OpenSoutheners\LaravelModelStatus\ModelStatus> $statuses
+     * @param  array<\OpenSoutheners\LaravelModelStatus\ModelStatus>  $statuses
      * @return void
      */
     public function scopeOfStatuses(Builder $query, array $statuses)
