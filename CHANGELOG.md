@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.4] - 2023-09-18
+
+### Fixed
+
+- Fully qualify columns on statuses query scopes
+
 ## [2.0.3] - 2023-03-29
 
 ### Fixed
