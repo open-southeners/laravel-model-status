@@ -281,7 +281,7 @@ trait HasStatuses
      */
     public function scopeOfStatus(Builder $query, ModelStatus $status)
     {
-        $query->where('status', $status->value ?? $status->name);
+        $query->where($this->qualifyColumn('status'), $status->value ?? $status->name);
     }
 
     /**
@@ -292,6 +292,9 @@ trait HasStatuses
      */
     public function scopeOfStatuses(Builder $query, array $statuses)
     {
-        $query->whereIn('status', array_map(fn (ModelStatus $statusCase) => $statusCase->value ?? $statusCase->name, $statuses));
+        $query->whereIn(
+            $this->qualifyColumn('status'),
+            array_map(fn (ModelStatus $statusCase) => $statusCase->value ?? $statusCase->name, $statuses)
+        );
     }
 }
