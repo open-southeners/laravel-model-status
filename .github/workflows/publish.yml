@@ -23,6 +23,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body: ${{ steps.query-release-info.outputs.release-notes }}
-          make_latest: ${{ $GITHUB_REF_NAME == 'main' && true || false }}
+          make_latest: ${{ github.ref_name == 'main' && true || false }}
           # prerelease: true
           # files: '*.vsix'
