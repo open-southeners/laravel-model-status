@@ -22,7 +22,7 @@ class StatusEnumCaseName implements CastsAttributes
      * Prepare the given value for storage.
      *
      * @param  \OpenSoutheners\LaravelModelStatus\Statusable  $model
-     * @param  mixed  $value
+     * @param  string  $value
      * @param  array<string, mixed>  $attributes
      * @return array<string, string>
      */
