@@ -12,8 +12,8 @@ class StatusSwapping
     use Dispatchable;
     use SerializesModels;
 
-    public function __construct(public Statusable $model, public ModelStatus $actual, public ModelStatus|null $previous = null)
+    public function __construct(public Statusable $model, public ModelStatus $actual, public ?ModelStatus $previous = null)
     {
-        // 
+        //
     }
 }

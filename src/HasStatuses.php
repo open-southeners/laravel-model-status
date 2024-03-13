@@ -109,12 +109,12 @@ trait HasStatuses
         return tap($callback(), fn () => static::$statusesEvents = true);
     }
 
-    public static function swappedStatus(Closure $callback, ModelStatus|null $status = null)
+    public static function swappedStatus(Closure $callback, ?ModelStatus $status = null)
     {
         static::registerModelEvent("swapped{$status?->name}", $callback);
     }
 
-    public static function swappingStatus(Closure $callback, ModelStatus|null $status = null)
+    public static function swappingStatus(Closure $callback, ?ModelStatus $status = null)
     {
         static::registerModelEvent("swapping{$status?->name}", $callback);
     }
@@ -186,7 +186,7 @@ trait HasStatuses
     /**
      * Fire swapping status custom Eloquent event.
      */
-    protected function fireSwappingStatusModelEvents(ModelStatus|null $previousStatus = null): bool
+    protected function fireSwappingStatusModelEvents(?ModelStatus $previousStatus = null): bool
     {
         if (! static::$statusesEvents) {
             return true;
@@ -206,7 +206,7 @@ trait HasStatuses
     /**
      * Fire status swapped custom Eloquent event.
      */
-    protected function fireSwappedStatusModelEvents(ModelStatus|null $previousStatus = null): void
+    protected function fireSwappedStatusModelEvents(?ModelStatus $previousStatus = null): void
     {
         if (static::$statusesEvents && $previousStatus !== $this->status) {
             $this->fireModelEvent("swapped{$this->status->name}", false);
@@ -276,7 +276,6 @@ trait HasStatuses
     /**
      * Query models by the specified status.
      *
-     * @param  \OpenSoutheners\LaravelModelStatus\ModelStatus  $status
      * @return void
      */
     public function scopeOfStatus(Builder $query, ModelStatus $status)

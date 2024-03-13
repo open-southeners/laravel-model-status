@@ -2,16 +2,15 @@
 
 namespace OpenSoutheners\LaravelModelStatus\Tests;
 
+use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Testing\Fakes\EventFake;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\CommentStatus;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Post;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\PostStatus;
 use OpenSoutheners\LaravelModelStatus\Tests\Fixtures\Tag;
 use PHPUnit\Framework\TestCase;
-use Exception;
 
 class HasStatusesTest extends TestCase
 {
